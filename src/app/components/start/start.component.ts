@@ -98,7 +98,7 @@ export class StartComponent implements OnInit {
       phrase: getRandom(category.values),
       category: this.showCategoryFormControl.value ? category.name : null,
       spies: this.getSpies(this.spiesFormControl.value, this.spiesRandomFormControl.value, this.playersFormControl.value),
-      starts: random(1, this.playersFormControl.value)
+      starts: randomPlayer(this.playersFormControl.value)
     }
     const compressed = this.codec.compress(settings)
     const url = location.origin + this.appRoot + this.gamePath + "/" + compressed;
@@ -123,8 +123,7 @@ export class StartComponent implements OnInit {
   getSpies(spies: number, spiesRandom: boolean, players: number) {
     let spiesNumber = spies; 
     if (spiesRandom) {
-      // todo wieksza szansa na mniej szpiegow, mala szansa na 0 lub wszyscy
-      spiesNumber = random(0, players)
+      spiesNumber = randomNumberWithDistribution(players)
     }
     const allPlayersIds = Array.from({length: players}, (_, i) => i + 1)
     const shuffledPlayers = allPlayersIds.sort(() => 0.5 - Math.random());
@@ -194,6 +193,30 @@ function getRandom(data: any) {
   return data[Math.floor(Math.random() * data.length)]
 }
 
-function random(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+function randomPlayer(max: number) {
+  return Math.floor(Math.random() * max) + 1
+}
+
+function randomNumberWithDistribution(max: number) {
+  const random = Math.floor(Math.random() * (100 + 1));
+  const defaultChance = CONFIG.DISTIBUTION.DEFAULT
+  const specialChance = (100 - (max * 5)) / CONFIG.DISTIBUTION.SPECIAL.length;
+
+
+  let i = 0;
+  let finalNum = 0;
+  while (i <= 100) {
+    if (CONFIG.DISTIBUTION.SPECIAL.includes(finalNum)) {
+      i += specialChance;
+    }
+    else {
+      i += defaultChance;
+    }
+    
+    if (random <= i) {
+      return finalNum;
+    }
+    finalNum++
+  }
+  return max;
 }

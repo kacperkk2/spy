@@ -18,7 +18,7 @@
             </div>
 
             <div fxFlex="20" fxLayout="column" fxLayoutAlign="start center">
-                <span class="primary phrase"> Zaczynasz turę! </span>
+                <span class="primary phrase" *ngIf="isUserStarting()"> Zaczynasz turę! </span>
             </div>
 
         </div>

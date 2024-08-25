@@ -3,8 +3,12 @@ export const CONFIG = {
   USER_ID_KEY: "user_id",
   FORM_KEY: "form",
 
-  URL_ROOT: "/spy",
+  URL_ROOT: "",
 
+  DISTIBUTION: {
+    DEFAULT: 5,
+    SPECIAL: [1]
+  },
 
   CATEGORIES: [
     {
