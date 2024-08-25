@@ -1,0 +1,92 @@
+
+<div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+
+    <div class="field" fxFlex="90" fxLayout="column" fxLayoutAlign="center center">
+        <form class="field" [formGroup]="startForm" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="30px">
+
+            <div class="field" fxLayout="column" fxLayoutAlign="space-between center">
+                <mat-label class="main-section"> Liczba graczy </mat-label> 
+                <mat-form-field class="number-field">
+                    <input 
+                        class="input main-section"
+                        matInput 
+                        type="number" 
+                        formControlName="players" 
+                        autocomplete="off" 
+                        onKeyPress="if(this.value.length==2) return false;"
+                        (keypress)="restrictCharacters($event)">
+                </mat-form-field>
+            </div>
+
+            <div class="field" fxLayout="column" fxLayoutAlign="center center">
+                <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                    <mat-label> Liczba szpiegów </mat-label> 
+                    <mat-form-field class="number-field">
+                        <input 
+                            class="input"
+                            matInput 
+                            type="number" 
+                            formControlName="spies" 
+                            autocomplete="off"
+                            onKeyPress="if(this.value.length==2) return false;"
+                            (keypress)="restrictCharacters($event)"
+                            (keyup)="checkSpies()">
+                    </mat-form-field>
+                </div>
+
+                <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                    <mat-label> Wylosuj liczbę szpiegów </mat-label> 
+                    <mat-checkbox class="checkbox" color="primary" formControlName="spiesRandom">  </mat-checkbox>
+                </div>
+            </div>
+        
+            <div class="field" fxLayout="column" fxLayoutAlign="center center">
+                <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                    <mat-label> Kategoria hasła </mat-label> 
+                    <mat-form-field class="number-field">
+                        <mat-select [formControl]="categoriesFormControl" multiple [disabled]="categoriesRandomFormControl.value">
+                            <mat-select-trigger>
+                                <span> Wybrano: {{ (categoriesFormControl.value?.length || 0) }} </span>
+                            </mat-select-trigger>
+                            <mat-option *ngFor="let category of categoriesTitles" [value]="category"> {{ category }} </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="field upper-checkbox" fxLayout="row" fxLayoutAlign="space-between center">
+                    <mat-label> Wylosuj kategorię </mat-label> 
+                    <mat-checkbox class="checkbox" color="primary" formControlName="categoriesRandom">  </mat-checkbox>
+                </div>
+
+                <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                    <mat-label> Pokazuj kategorię graczom </mat-label> 
+                    <mat-checkbox class="checkbox" color="primary" formControlName="showCategory">  </mat-checkbox>
+                </div>
+            </div>
+        
+            <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-label> Liczba rund </mat-label> 
+                <mat-form-field class="number-field">
+                    <input 
+                        class="input"
+                        matInput 
+                        type="number" 
+                        formControlName="links" 
+                        autocomplete="off" 
+                        onKeyPress="if(this.value.length==2) return false;"
+                        (keypress)="restrictCharacters($event)">
+                </mat-form-field>
+            </div>
+        </form>
+    </div>
+
+    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
+        <button class="fab" mat-fab color="secondary" (click)="back()">
+          <mat-icon> close </mat-icon>
+        </button>
+        <button mat-flat-button class="bottom-button" color="primary" 
+            [disabled]="!startForm.valid" 
+            (click)="generateClicked()"> Stwórz </button>
+    </div>
+
+</div>

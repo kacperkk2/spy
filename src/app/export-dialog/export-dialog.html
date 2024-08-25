@@ -1,0 +1,14 @@
+
+<h2 mat-dialog-title fxLayout="row" fxLayoutAlign="center center"> Skopiuj link żeby udostępnić </h2>
+<mat-dialog-content fxLayout="column" fxLayoutAlign="center center">
+    <div class="hide-overflow" style="max-width: 90%;">
+        <div *ngFor="let url of data.urls" class="hide-overflow"> {{ url }} </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayout="row" fxLayoutAlign="space-evenly center">
+    <button fxFlex="40" mat-stroked-button [mat-dialog-close]> Anuluj </button>
+    <button fxFlex="40" mat-flat-button color="primary" 
+            [cdkCopyToClipboard]="getDataToCopy()"
+            (click)="close()"> Kopiuj link </button>
+</mat-dialog-actions>

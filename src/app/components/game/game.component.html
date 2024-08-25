@@ -1,0 +1,42 @@
+
+<div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+
+    <div fxFlex="90" fxLayout="column" fxLayoutAlign="center center">
+        <div fxFlexFill *ngIf="isPhraseShowed" fxLayout="column">
+
+            <div fxFlex="30" fxLayout="column" fxLayoutAlign="end center">
+                <span class="phrase-title grey"> Hasło </span>
+                <span class="phrase" *ngIf="!isUserSpy()"> {{ settings.phrase }} </span>
+                <span class="phrase" *ngIf="isUserSpy()"> Szpieg </span>
+            </div>
+
+            <div fxFlex="50" fxLayout="column" fxLayoutAlign="center center">
+                <div *ngIf="settings.category" fxLayout="column" fxLayoutAlign="center center">
+                    <span class="phrase-title grey"> Kategoria </span>
+                    <span class="phrase"> {{ settings.category }} </span>
+                </div>
+            </div>
+
+            <div fxFlex="20" fxLayout="column" fxLayoutAlign="start center">
+                <span class="primary phrase"> Zaczynasz turę! </span>
+            </div>
+
+        </div>
+    </div>
+    
+    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
+        <button class="fab" mat-fab color="secondary" (click)="back()">
+          <mat-icon> close </mat-icon>
+        </button>
+        <button *ngIf="!isPhraseShowed"
+            mat-flat-button 
+            class="bottom-button" 
+            color="primary" 
+            (click)="show()"> Pokaż hasło </button>
+        <button *ngIf="isPhraseShowed"
+            mat-flat-button 
+            class="bottom-button" 
+            color="primary" 
+            (click)="hide()"> Ukryj hasło </button>
+    </div>
+</div>

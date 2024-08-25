@@ -1,0 +1,17 @@
+
+<div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+
+    <div fxFlex="30" fxLayout="column" fxLayoutAlign="center center">
+        <span class="user-label"> Gracz numer </span>
+    </div>
+
+    <div fxFlex="60" fxLayout="column" fxLayoutAlign="start center">
+        <span class="id-label"> {{ userId }} </span>
+        <button class="small-button" mat-flat-button (click)="changeUserId()"> Zmień numer </button>
+    </div>
+    
+    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
+        <button class="bottom-button" mat-flat-button color="primary" (click)="start()"> Stwórz grę </button>
+    </div>
+
+</div>

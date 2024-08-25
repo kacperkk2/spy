@@ -1,0 +1,30 @@
+
+<div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+
+    <div fxFlex="30" fxLayout="column" fxLayoutAlign="center center">
+        <span class="user-label"> Podaj numer gracza </span>
+    </div>
+
+    <div fxFlex="60" fxLayout="column" fxLayoutAlign="start center">
+        <form [formGroup]="userForm">
+            <mat-form-field >
+                <input 
+                    class="input" 
+                    matInput 
+                    type="number" 
+                    formControlName="userId" 
+                    autocomplete="off" 
+                    onKeyPress="if(this.value.length==2) return false;"
+                    (keypress)="restrictCharacters($event)">
+            </mat-form-field>
+        </form>
+        <p class="reminder grey"> Pamiętaj, że każdy gracz powinien mieć inny numer </p>
+    </div>
+    
+    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
+        <button class="fab" mat-fab color="secondary" [disabled]="!userId" (click)="back()">
+          <mat-icon> close </mat-icon>
+        </button>
+        <button mat-flat-button class="bottom-button" color="primary" [disabled]="!userForm.valid" (click)="save()"> Zapisz </button>
+    </div>
+</div>
