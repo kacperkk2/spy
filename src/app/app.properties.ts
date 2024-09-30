@@ -286,7 +286,7 @@ export const CONFIG = {
         'Sarna',
         'Żubr',
         'Krokodyl',
-        'Banan',
+        'Baran',
         'Sowa',
         'Puchacz',
         'Orzeł',
