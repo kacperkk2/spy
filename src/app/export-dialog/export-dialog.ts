@@ -16,7 +16,7 @@ export class ExportDialog {
   }
 
   getDataToCopy() {
-    return this.data.urls.join("\n");
+    return this.data.urls.join("\n\n");
   }
 
   close() {

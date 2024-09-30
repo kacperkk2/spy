@@ -87,7 +87,7 @@ export class StartComponent implements OnInit {
   getLinks(numberOfLinks: number): string [] {
     const links: string[] = [];
     Array.from(Array(numberOfLinks)).forEach((_, i) => {
-      links.push((i+1) + ". " + this.getLink());
+      links.push((i+1) + ". \n" + this.getLink());
     });
     return links;
   }
