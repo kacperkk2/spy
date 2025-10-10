@@ -32,10 +32,11 @@ export class GameComponent implements OnInit {
           this.generatePlayerRows()
         }
         else {
-          this.userId = Number(this.storageManager.getUserId());
-          if (this.userId == null) {
+          let user = this.storageManager.getUserId();
+          if (user == null) {
             this.router.navigate(['/user']);
           }
+          this.userId = Number(user);
         }
       }
       else {
