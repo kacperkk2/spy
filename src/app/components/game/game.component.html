@@ -1,7 +1,21 @@
-
 <div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
 
-    <div fxFlex="90" fxLayout="column" fxLayoutAlign="center center">
+    <div *ngIf="settings.oneDevice" fxFlex="25" fxLayout="column" fxLayoutAlign="start center">
+        <div fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="5px">
+            <div *ngFor="let row of playerRows" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5px">
+                <button *ngFor="let player of row"
+                        mat-flat-button
+                        [color]="player === userId ? 'primary' : 'secondary'"
+                        (click)="setCurrentUser(player)"
+                        class="bottom-button">
+                    {{ player }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div [fxFlex]="settings.oneDevice ? '65' : '90'" fxLayout="column" fxLayoutAlign="center center">
+
         <div fxFlexFill *ngIf="isPhraseShowed" fxLayout="column">
 
             <div fxFlex="30" fxLayout="column" fxLayoutAlign="end center">

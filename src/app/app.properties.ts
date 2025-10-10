@@ -276,7 +276,6 @@ export const CONFIG = {
         'Meduza',
         'Żółw',
         'Płaszczka',
-        'Skwirrel',
         'Wiewiórka',
         'Niedźwiedź',
         'Wilk',

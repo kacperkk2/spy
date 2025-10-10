@@ -13,7 +13,8 @@ export class GameComponent implements OnInit {
 
   isPhraseShowed: boolean = false;
   settings: Settings;
-  userId: string | null = "";
+  userId: number = 1;
+  playerRows: number[][] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -22,15 +23,20 @@ export class GameComponent implements OnInit {
     private router: Router) { }
 
   ngOnInit(): void {
-    this.userId = this.storageManager.getUserId();
-    if (this.userId == null) {
-      this.router.navigate(['/user']);
-    }
-
     this.route.params.subscribe(params => {
       const data = params['data'];
       if (data) {
         this.settings = this.codec.decompress(data);
+        if (this.settings.oneDevice) {
+          this.userId = 1
+          this.generatePlayerRows()
+        }
+        else {
+          this.userId = Number(this.storageManager.getUserId());
+          if (this.userId == null) {
+            this.router.navigate(['/user']);
+          }
+        }
       }
       else {
         this.router.navigate(['/']);
@@ -38,12 +44,27 @@ export class GameComponent implements OnInit {
     });
   }
 
+  generatePlayerRows(): void {
+    const players = this.settings.playersCount;
+    const rows: number[][] = [];
+    for (let i = 0; i < players; i += 5) {
+      rows.push(
+        Array.from({ length: Math.min(5, players - i) }, (_, j) => i + j + 1)
+      );
+    }
+    this.playerRows = rows;
+  }
+
+  setCurrentUser(player: number): void {
+    this.userId = player;
+  }
+
   isUserSpy() {
-    return this.settings.spies.includes(Number(this.userId))
+    return this.settings.spies.includes(this.userId)
   }
 
   isUserStarting() {
-    return this.settings.starts == Number(this.userId)
+    return this.settings.starts == this.userId
   }
   
   back() {

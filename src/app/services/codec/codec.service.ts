@@ -15,7 +15,9 @@ export class CodecService {
     const short = settings.phrase + this.delimiter + 
         settings.category + this.delimiter + 
         JSON.stringify(settings.spies) + this.delimiter + 
-        settings.starts
+        settings.starts + this.delimiter + 
+        settings.playersCount + this.delimiter + 
+        settings.oneDevice
     return compressEncode(short);
   }
 
@@ -26,6 +28,8 @@ export class CodecService {
       category: settingsString[1] == "null" ? null : settingsString[1],
       spies: JSON.parse(settingsString[2]),
       starts: Number(settingsString[3]),
+      playersCount: Number(settingsString[4]),
+      oneDevice: Boolean(JSON.parse(settingsString[5])),
     }
   }
 }

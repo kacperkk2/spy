@@ -49,6 +49,10 @@ export class StartComponent implements OnInit {
     return this.startForm.controls["links"] as FormControl;
   }
 
+  get onaDeviceControl() {
+    return this.startForm.controls["oneDevice"] as FormControl;
+  }
+
   constructor(
     private storageManager: StorageManagerService,
     private codec: CodecService,
@@ -66,6 +70,7 @@ export class StartComponent implements OnInit {
       categoriesRandom: new FormControl(false),
       showCategory: new FormControl(false),
       links: new FormControl(3, [Validators.required]),
+      oneDevice: new FormControl(false),
     });
     this.checkedRandomSpies();
     this.checkedRandomCategory();
@@ -98,7 +103,9 @@ export class StartComponent implements OnInit {
       phrase: getRandom(category.values),
       category: this.showCategoryFormControl.value ? category.name : null,
       spies: this.getSpies(this.spiesFormControl.value, this.spiesRandomFormControl.value, this.playersFormControl.value),
-      starts: randomPlayer(this.playersFormControl.value)
+      starts: randomPlayer(this.playersFormControl.value),
+      playersCount: this.playersFormControl.value,
+      oneDevice: this.onaDeviceControl.value
     }
     const compressed = this.codec.compress(settings)
     const url = location.origin + this.appRoot + this.gamePath + "/" + compressed;
@@ -186,7 +193,9 @@ export interface Settings {
   phrase: string,
   category: string | null,
   spies: number[],
-  starts: number
+  starts: number,
+  playersCount: number,
+  oneDevice: boolean
 }
 
 function getRandom(data: any) {
