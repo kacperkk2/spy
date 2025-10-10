@@ -13,7 +13,7 @@ export class GameComponent implements OnInit {
 
   isPhraseShowed: boolean = false;
   settings: Settings;
-  userId: number = 1;
+  userId: number;
   playerRows: number[][] = [];
 
   constructor(
