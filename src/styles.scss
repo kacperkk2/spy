@@ -73,6 +73,15 @@ body {
   width: 50px !important;
 }
 
+.fab-right {
+  margin-left: 10px !important; 
+  height: 50px !important;
+  width: 50px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 .fab mat-icon {
   line-height: 17px !important;
 }

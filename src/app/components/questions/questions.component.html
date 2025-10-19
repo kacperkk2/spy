@@ -1,0 +1,35 @@
+<div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+
+    <form class="field" [formGroup]="questionsForm" fxLayout="column" fxLayoutAlign="center center" style="margin-top: 5px;">
+        <div class="field" fxLayout="column" fxLayoutAlign="center center">
+            <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-label> Kategoria pytań: </mat-label> 
+                <mat-form-field class="number-field">
+                    <mat-select [formControl]="categoriesFormControl" multiple>
+                        <mat-select-trigger>
+                            <span> {{ categoriesFormControl.value }} </span>
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let category of categoriesTitles" [value]="category"> {{ category }} </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+    </form>
+
+    <div fxFlex="90" fxLayout="column" fxLayoutAlign="center center">
+        <div fxLayout="column" fxLayoutAlign="end center">
+            <span class="phrase"> {{ question }} </span>
+        </div>
+    </div>
+    
+    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
+        <button class="fab" mat-fab color="secondary" (click)="back()">
+          <mat-icon> keyboard_arrow_left </mat-icon>
+        </button>
+        <button mat-flat-button 
+            class="bottom-button" 
+            color="primary" 
+            [disabled]="!questionsForm.valid" 
+            (click)="next()"> Losuj pytanie </button>
+    </div>
+</div>

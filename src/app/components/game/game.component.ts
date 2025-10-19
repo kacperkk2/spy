@@ -71,6 +71,10 @@ export class GameComponent implements OnInit {
   back() {
     this.router.navigate(['/']);
   }
+  
+  goToQuestions() {
+    this.router.navigate(['/questions/' + this.settings.category]);
+  }
 
   show() {
     this.isPhraseShowed = true;

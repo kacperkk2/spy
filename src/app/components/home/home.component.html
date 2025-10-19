@@ -10,7 +10,11 @@
         <button class="small-button" mat-flat-button (click)="changeUserId()"> Zmień numer </button>
     </div>
     
+
     <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
+        <button class="fab" mat-fab color="secondary" (click)="goToQuestions()">
+            <mat-icon> question_mark </mat-icon>
+        </button>
         <button class="bottom-button" mat-flat-button color="primary" (click)="start()"> Stwórz grę </button>
     </div>
 

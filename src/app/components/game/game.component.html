@@ -1,6 +1,6 @@
 <div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
 
-    <div *ngIf="settings.oneDevice" fxFlex="25" fxLayout="column" fxLayoutAlign="start center">
+    <div *ngIf="settings.oneDevice" fxFlex="25" fxLayout="column" fxLayoutAlign="start center" style="margin-top: 5px;">
         <div fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="5px">
             <div *ngFor="let row of playerRows" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5px">
                 <button *ngFor="let player of row"
@@ -52,5 +52,8 @@
             class="bottom-button" 
             color="primary" 
             (click)="hide()"> Ukryj hasło </button>
+        <button class="fab-right" mat-fab color="secondary" (click)="goToQuestions()">
+          <mat-icon> question_mark </mat-icon>
+        </button>
     </div>
 </div>

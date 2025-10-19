@@ -30,4 +30,8 @@ export class HomeComponent implements OnInit {
   start() {
     this.router.navigate(['/start']);
   }
+  
+  goToQuestions() {
+    this.router.navigate(['/questions']);
+  }
 }

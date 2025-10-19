@@ -23,6 +23,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { ExportDialog } from './export-dialog/export-dialog';
 import { ClipboardModule } from '@angular/cdk/clipboard';
+import { QuestionsComponent } from './components/questions/questions.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
     HomeComponent,
     UserComponent,
     StartComponent,
+    QuestionsComponent,
     GameComponent,
     ExportDialog,
   ],
