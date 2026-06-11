@@ -13,6 +13,26 @@
                     </mat-select>
                 </mat-form-field>
             </div>
+
+            <div fxLayout="row" fxLayoutAlign="space-between center" style="width: 100%;">
+                <mat-label> Typ pytań: </mat-label> 
+                <div fxLayout="row" fxLayoutAlign="end end">
+                    <button mat-flat-button
+                        [color]="questionType === 'yesNo' ? 'primary' : ''"
+                        class="type-button"
+                        (click)="questionType = 'yesNo'">
+                        Tak / Nie
+                    </button>
+
+                    <button
+                        mat-flat-button
+                        [color]="questionType === 'open' ? 'primary' : ''"
+                        class="type-button"
+                        (click)="questionType = 'open'">
+                        Otwarte
+                    </button>
+                </div>
+            </div>
         </div>
     </form>
 
@@ -21,7 +41,7 @@
             <span class="phrase"> {{ question }} </span>
         </div>
     </div>
-    
+
     <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
         <button class="fab" mat-fab color="secondary" (click)="back()">
           <mat-icon> keyboard_arrow_left </mat-icon>

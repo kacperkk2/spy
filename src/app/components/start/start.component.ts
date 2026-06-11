@@ -49,8 +49,12 @@ export class StartComponent implements OnInit {
     return this.startForm.controls["links"] as FormControl;
   }
 
-  get onaDeviceControl() {
+  get oneDeviceControl() {
     return this.startForm.controls["oneDevice"] as FormControl;
+  }
+
+  get oneSpyChance() {
+    return this.startForm.controls["oneSpyChance"] as FormControl;
   }
 
   constructor(
@@ -66,6 +70,7 @@ export class StartComponent implements OnInit {
       players: new FormControl(3, [Validators.required]),
       spies: new FormControl(1, [Validators.required]),
       spiesRandom: new FormControl(false),
+      oneSpyChance: new FormControl(30, [Validators.required]),
       categories: new FormControl([], [Validators.required]),
       categoriesRandom: new FormControl(false),
       showCategory: new FormControl(false),
@@ -102,10 +107,10 @@ export class StartComponent implements OnInit {
     const settings: Settings = {
       phrase: getRandom(category.values),
       category: this.showCategoryFormControl.value ? category.name : null,
-      spies: this.getSpies(this.spiesFormControl.value, this.spiesRandomFormControl.value, this.playersFormControl.value),
+      spies: this.getSpies(this.spiesFormControl.value, this.spiesRandomFormControl.value, this.playersFormControl.value, this.oneSpyChance.value),
       starts: randomPlayer(this.playersFormControl.value),
       playersCount: this.playersFormControl.value,
-      oneDevice: this.onaDeviceControl.value
+      oneDevice: this.oneDeviceControl.value
     }
     const compressed = this.codec.compress(settings)
     const url = location.origin + this.appRoot + this.gamePath + "/" + compressed;
@@ -127,10 +132,10 @@ export class StartComponent implements OnInit {
     return category
   }
 
-  getSpies(spies: number, spiesRandom: boolean, players: number) {
-    let spiesNumber = spies; 
+  getSpies(spies: number, spiesRandom: boolean, players: number, oneSpyChance: number) {
+    let spiesNumber = spies;
     if (spiesRandom) {
-      spiesNumber = randomNumberWithDistribution(players)
+      spiesNumber = getRandomSpies(players, oneSpyChance)
     }
     const allPlayersIds = Array.from({length: players}, (_, i) => i + 1)
     const shuffledPlayers = allPlayersIds.sort(() => 0.5 - Math.random());
@@ -146,11 +151,16 @@ export class StartComponent implements OnInit {
       if (this.spiesRandomFormControl.value == true) {
         this.spiesFormControl.clearValidators();
         this.spiesFormControl.disable();
+        this.oneSpyChance.setValidators([Validators.required]);
+        this.oneSpyChance.enable();
       } else {
         this.spiesFormControl.setValidators([Validators.required]);
         this.spiesFormControl.enable();
+        this.oneSpyChance.clearValidators();
+        this.oneSpyChance.disable();
       }
       this.spiesFormControl.updateValueAndValidity();
+      this.oneSpyChance.updateValueAndValidity();
     });
   }
 
@@ -206,26 +216,15 @@ function randomPlayer(max: number) {
   return Math.floor(Math.random() * max) + 1
 }
 
-function randomNumberWithDistribution(max: number) {
-  const random = Math.floor(Math.random() * (100 + 1));
-  const defaultChance = CONFIG.DISTIBUTION.DEFAULT
-  const specialChance = (100 - (max * 5)) / CONFIG.DISTIBUTION.SPECIAL.length;
-
-
-  let i = 0;
-  let finalNum = 0;
-  while (i <= 100) {
-    if (CONFIG.DISTIBUTION.SPECIAL.includes(finalNum)) {
-      i += specialChance;
-    }
-    else {
-      i += defaultChance;
-    }
-    
-    if (random <= i) {
-      return finalNum;
-    }
-    finalNum++
+function getRandomSpies(players: number, oneSpyChance: number) {
+  const chaosChance = (100 - oneSpyChance) / 100;
+  if (Math.random() > chaosChance) {
+    return 1;
   }
-  return max;
+
+  // wypadlo ze bedzie inna liczba szpiegow niz 1
+  const effectiveMax = Math.min(players, CONFIG.MAX_SPIES_LIMIT);
+  const pool = effectiveMax;
+  const roll = Math.floor(Math.random() * pool);
+  return roll < 1 ? 0 : roll + 1;
 }

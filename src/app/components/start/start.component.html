@@ -38,6 +38,20 @@
                     <mat-label> Wylosuj liczbę szpiegów </mat-label> 
                     <mat-checkbox class="checkbox" color="primary" formControlName="spiesRandom">  </mat-checkbox>
                 </div>
+
+                <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                    <mat-label> Szansa % na jednego szpiega </mat-label> 
+                    <mat-form-field class="number-field">
+                        <input 
+                            class="input"
+                            matInput 
+                            type="number" 
+                            formControlName="oneSpyChance" 
+                            autocomplete="off" 
+                            onKeyPress="if(this.value.length==2) return false;"
+                            (keypress)="restrictCharacters($event)">
+                    </mat-form-field>
+                </div>
             </div>
         
             <div class="field" fxLayout="column" fxLayoutAlign="center center">

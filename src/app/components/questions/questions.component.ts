@@ -15,6 +15,7 @@ export class QuestionsComponent implements OnInit {
   categoriesTitles: string[]; 
   questionsForm: FormGroup;
   question: string = '';
+  questionType: 'yesNo' | 'open' = 'yesNo';
 
   get categoriesFormControl() {
     return this.questionsForm.controls["categories"] as FormControl;
@@ -45,7 +46,14 @@ export class QuestionsComponent implements OnInit {
     const selectedCategories: string[] = this.categoriesFormControl.value
     const questions = this.allCategories
       .filter(category => selectedCategories.includes(category.name))
-      .flatMap(category => category.questions)
+      .flatMap(category => {
+        if (this.questionType == 'yesNo') {
+          return category.questionsYesNo;
+        }
+        else {
+          return category.questionsOpen;
+        }
+      })
 
     this.question = this.getRandom(questions)
   }
