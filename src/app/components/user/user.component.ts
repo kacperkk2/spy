@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { StorageManagerService } from 'src/app/services/storage-manager/storage-manager.service';
 
 @Component({
@@ -12,6 +12,7 @@ export class UserComponent implements OnInit {
 
   userId: string | null = "";
   userForm: FormGroup;
+  private returnData: string | null = null;
 
   get userIdFormControl() {
     return this.userForm.controls["userId"] as FormControl;
@@ -19,11 +20,13 @@ export class UserComponent implements OnInit {
 
   constructor(
     private storageManager: StorageManagerService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
   ) { }
 
   ngOnInit(): void {
     this.userId = this.storageManager.getUserId();
+    this.returnData = this.route.snapshot.params['data'] ?? null;
     this.userForm = new FormGroup({
       userId: new FormControl(this.userId, [Validators.required, Validators.min(1)])
     });
@@ -32,7 +35,11 @@ export class UserComponent implements OnInit {
   save() {
     const userId = this.userIdFormControl.value;
     this.storageManager.saveUserId(userId);
-    this.router.navigate(['/']);
+    if (this.returnData) {
+      this.router.navigate(['/game', this.returnData]);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 
   back() {

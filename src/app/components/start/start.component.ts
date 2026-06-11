@@ -79,6 +79,7 @@ export class StartComponent implements OnInit {
     });
     this.checkedRandomSpies();
     this.checkedRandomCategory();
+    this.checkedOneDevice();
     const storageForm = this.storageManager.getForm();
     if (storageForm != null) {
       this.startForm.patchValue(storageForm);
@@ -87,6 +88,12 @@ export class StartComponent implements OnInit {
 
   generateClicked() {
     this.storageManager.saveForm(this.startForm.value);
+
+    if (this.oneDeviceControl.value == true) {
+      this.router.navigate(['/game', this.getDataForLink()]);
+      return;
+    }
+
     const links = this.getLinks(Number(this.linksFormControl.value))
 
     const data = new ExportDialogInput(links);
@@ -103,6 +110,11 @@ export class StartComponent implements OnInit {
   }
 
   getLink() {
+    const url = location.origin + this.appRoot + this.gamePath + "/" + this.getDataForLink();
+    return url
+  }
+
+  getDataForLink() {
     const category = this.getCategory(this.categoriesFormControl.value, this.categoriesRandomFormControl.value)
     const settings: Settings = {
       phrase: getRandom(category.values),
@@ -112,9 +124,7 @@ export class StartComponent implements OnInit {
       playersCount: this.playersFormControl.value,
       oneDevice: this.oneDeviceControl.value
     }
-    const compressed = this.codec.compress(settings)
-    const url = location.origin + this.appRoot + this.gamePath + "/" + compressed;
-    return url
+    return this.codec.compress(settings)
   }
 
   getCategoryByName(name: string) {
@@ -168,10 +178,25 @@ export class StartComponent implements OnInit {
     this.categoriesRandomFormControl.valueChanges.subscribe(val => {
       if (this.categoriesRandomFormControl.value == true) {
         this.categoriesFormControl.clearValidators();
+        this.categoriesFormControl.disable();
       } else {
         this.categoriesFormControl.setValidators([Validators.required]);
+        this.categoriesFormControl.enable();
       }
       this.categoriesFormControl.updateValueAndValidity();
+    });
+  }
+
+  checkedOneDevice() {
+    this.oneDeviceControl.valueChanges.subscribe(val => {
+      if (this.oneDeviceControl.value == true) {
+        this.linksFormControl.clearValidators();
+        this.linksFormControl.disable();
+      } else {
+        this.linksFormControl.setValidators([Validators.required]);
+        this.linksFormControl.enable();
+      }
+      this.linksFormControl.updateValueAndValidity();
     });
   }
 

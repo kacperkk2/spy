@@ -19,7 +19,7 @@ export class GameComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private codec: CodecService, 
-    private storageManager: StorageManagerService, 
+    private storageManager: StorageManagerService,
     private router: Router) { }
 
   ngOnInit(): void {
@@ -34,7 +34,7 @@ export class GameComponent implements OnInit {
         else {
           let user = this.storageManager.getUserId();
           if (user == null) {
-            this.router.navigate(['/user']);
+            this.router.navigate(['/user', data]);
           }
           this.userId = Number(user);
         }
