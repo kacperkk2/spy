@@ -38,7 +38,8 @@
 
     <div fxFlex="90" fxLayout="column" fxLayoutAlign="center center">
         <div fxLayout="column" fxLayoutAlign="end center">
-            <span class="phrase"> {{ question }} </span>
+            <span *ngIf="question" class="phrase"> {{ question }} </span>
+            <span *ngIf="!question && !hasCategories" class="phrase grey"> Wybierz kategorię </span>
         </div>
     </div>
 

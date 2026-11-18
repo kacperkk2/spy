@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { StorageManagerService } from 'src/app/services/storage-manager/storage-manager.service';
+import { RoomSession, StorageManagerService } from 'src/app/services/storage-manager/storage-manager.service';
+import { openNickDialog } from '../nick-dialog/nick-dialog';
 
+/** Ekran startowy — wybór trybu gry (online / jeden telefon). Nie odpytuje API. */
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -9,29 +12,37 @@ import { StorageManagerService } from 'src/app/services/storage-manager/storage-
 })
 export class HomeComponent implements OnInit {
 
-  userId: string | null = "";
+  /** Ostatni pokój, w którym gracz był (może to być jego własny). */
+  session: RoomSession | null = null;
+  nick: string | null = null;
 
   constructor(
     private storageManager: StorageManagerService,
+    private dialog: MatDialog,
     private router: Router
   ) { }
 
   ngOnInit(): void {
-    this.userId = this.storageManager.getUserId();
-    if (this.userId == null) {
-      this.router.navigate(['/user']);
-    }
+    this.session = this.storageManager.getRoomSession();
+    this.nick = this.storageManager.getNick();
   }
 
-  changeUserId() {
-    this.router.navigate(['/user']);
+  changeNick() {
+    openNickDialog(this.dialog, this.storageManager, { nick: this.nick, inRoom: !!this.session })
+      .subscribe(nick => this.nick = nick || this.nick);
   }
 
-  start() {
+  online() {
+    this.router.navigate(['/online']);
+  }
+
+  oneDevice() {
     this.router.navigate(['/start']);
   }
-  
-  goToQuestions() {
-    this.router.navigate(['/questions']);
+
+  returnToRoom() {
+    if (this.session) {
+      this.router.navigate(['/room', this.session.code]);
+    }
   }
 }

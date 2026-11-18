@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,19 +22,26 @@ import { AppComponent } from './app.component';
 import { GameComponent } from './components/game/game.component';
 import { HomeComponent } from './components/home/home.component';
 import { QuestionsComponent } from './components/questions/questions.component';
+import { ConfirmDialog } from './components/confirm-dialog/confirm-dialog';
+import { RoomComponent } from './components/room/room.component';
+import { OnlineComponent } from './components/online/online.component';
+import { NickDialog } from './components/nick-dialog/nick-dialog';
+import { RoundSettingsDialog } from './components/round-settings-dialog/round-settings-dialog';
 import { StartComponent } from './components/start/start.component';
-import { UserComponent } from './components/user/user.component';
-import { ExportDialog } from './export-dialog/export-dialog';
+import { PlayerTokenInterceptor } from './services/room-api/player-token.interceptor';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    UserComponent,
     StartComponent,
     QuestionsComponent,
     GameComponent,
-    ExportDialog,
+    RoomComponent,
+    OnlineComponent,
+    RoundSettingsDialog,
+    ConfirmDialog,
+    NickDialog,
   ],
   imports: [
     BrowserModule,
@@ -57,7 +64,9 @@ import { ExportDialog } from './export-dialog/export-dialog';
     MatCheckboxModule,
     ClipboardModule
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: PlayerTokenInterceptor, multi: true },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

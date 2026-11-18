@@ -1,0 +1,121 @@
+// Układ widoków jednego urządzenia (start, game) wzorowany na room.component.scss.
+// Kopia celowa — zmiany tutaj nie wpływają na widok online.
+
+.top-bar {
+  width: 100%;
+  flex: 0 0 auto;
+  padding: 8px 12px 0;
+  box-sizing: border-box;
+}
+
+.mode-chip {
+  font-size: 16px;
+  line-height: 36px;
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+}
+
+.round-status {
+  font-size: 16px;
+  text-align: right;
+  padding-top: 6px;
+}
+
+.content {
+  overflow-y: auto;
+}
+
+.players {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 24px;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.players-header {
+  margin-bottom: 8px;
+  padding: 0 4px;
+  min-width: 0;
+}
+
+.players-title {
+  flex: 0 0 auto;
+  font-size: 16px;
+}
+
+.players-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.player {
+  font-size: 18px;
+  padding: 10px 16px;
+  min-width: 0;
+
+  & + .player {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  &.spy {
+    background: rgba(239, 83, 80, 0.14); // red 400 z alfą
+  }
+
+  .spy-badge {
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: #EF5350;
+    border: 1px solid #EF5350;
+  }
+
+  .nick {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.round {
+  margin: 32px 0 24px;
+  padding: 0 24px;
+}
+
+.reveal-phrase {
+  font-size: 22px;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.reveal-category {
+  font-size: 18px;
+  text-align: center;
+}
+
+.phrase-title {
+  font-size: 40px;
+  text-align: center;
+}
+
+.phrase {
+  font-size: 20px;
+  text-align: center;
+}
+
+.hint {
+  margin-top: 12px;
+  text-align: center;
+}

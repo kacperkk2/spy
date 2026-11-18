@@ -1,8 +1,57 @@
 
-.user-label {
-  font-size: 30px;
+.title {
+  font-size: 60px;
 }
 
-.id-label {
-  font-size: 150px;
+.nick-button {
+  font-size: 15px;
+  border-radius: 20px;
+}
+
+.nick-icon {
+  font-size: 16px;
+  height: 16px;
+  width: 16px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.question {
+  text-align: center;
+  font-size: 15px;
+}
+
+.mode-tile {
+  border-radius: 20px !important;
+  min-height: 96px;
+  padding: 16px 20px !important;
+  text-align: left;
+  white-space: normal;
+  line-height: normal;
+}
+
+// treść kafla na całą szerokość
+.mode-tile ::ng-deep .mat-button-wrapper {
+  display: block;
+}
+
+.mode-icon {
+  font-size: 40px;
+  height: 40px;
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.mode-title {
+  font-size: 19px;
+}
+
+.mode-desc {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.content {
+  overflow-y: auto;
+  padding-top: 32px;
 }

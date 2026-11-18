@@ -1,0 +1,68 @@
+<h2 mat-dialog-title class="title" fxLayout="row" fxLayoutAlign="center center"> Ustawienia rundy </h2>
+<p class="grey hint"> Obowiązują od następnej rundy </p>
+
+<mat-dialog-content class="content">
+    <form [formGroup]="form" fxLayout="column" fxLayoutAlign="start stretch" fxLayoutGap="16px">
+
+        <div fxLayout="column">
+            <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-label> Liczba szpiegów </mat-label>
+                <mat-form-field class="number-field">
+                    <input class="input" matInput type="number" formControlName="spies" autocomplete="off"
+                           [errorStateMatcher]="spiesErrorMatcher"
+                           onKeyPress="if(this.value.length==2) return false;"
+                           (keypress)="restrictCharacters($event)">
+                    <mat-error *ngIf="spies.hasError('required')"> Podaj liczbę </mat-error>
+                    <mat-error *ngIf="spies.hasError('min')"> Min. 0 </mat-error>
+                    <mat-error *ngIf="form.hasError('spiesExceedPlayers')"> Więcej niż graczy </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-label> Wylosuj liczbę szpiegów </mat-label>
+                <mat-checkbox class="checkbox" color="primary" formControlName="spiesRandom"></mat-checkbox>
+            </div>
+
+            <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-label> Szansa % na jednego szpiega </mat-label>
+                <mat-form-field class="number-field">
+                    <input class="input" matInput type="number" formControlName="oneSpyChance" autocomplete="off"
+                           onKeyPress="if(this.value.length==3) return false;"
+                           (keypress)="restrictCharacters($event)">
+                    <mat-error *ngIf="oneSpyChance.hasError('required')"> Podaj liczbę </mat-error>
+                    <mat-error *ngIf="oneSpyChance.hasError('min') || oneSpyChance.hasError('max')"> Od 0 do 100 </mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div fxLayout="column">
+            <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-label> Kategoria hasła </mat-label>
+                <mat-form-field class="number-field">
+                    <mat-select formControlName="categories" multiple>
+                        <mat-select-trigger>
+                            <span> Wybrano: {{ (categories.value?.length || 0) }} </span>
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let category of categoriesTitles" [value]="category"> {{ category }} </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="categories.hasError('required')"> Wybierz </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="field upper-checkbox" fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-label> Wylosuj kategorię </mat-label>
+                <mat-checkbox class="checkbox" color="primary" formControlName="categoriesRandom"></mat-checkbox>
+            </div>
+
+            <div class="field" fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-label> Pokazuj kategorię graczom </mat-label>
+                <mat-checkbox class="checkbox" color="primary" formControlName="showCategory"></mat-checkbox>
+            </div>
+        </div>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="actions" fxLayout="row" fxLayoutAlign="space-evenly center">
+    <button fxFlex="40" mat-stroked-button [mat-dialog-close]="undefined"> Anuluj </button>
+    <button fxFlex="40" mat-flat-button color="primary" [disabled]="form.invalid" (click)="save()"> Zapisz </button>
+</mat-dialog-actions>

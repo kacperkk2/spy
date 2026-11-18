@@ -1,7 +1,16 @@
-<div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+<div fxFlexFill fxLayout="column" fxLayoutAlign="start center">
 
-    <div *ngIf="settings.oneDevice" fxFlex="25" fxLayout="column" fxLayoutAlign="start center" style="margin-top: 5px;">
-        <div fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="5px">
+    <div class="top-bar" fxLayout="row" fxLayoutAlign="space-between start">
+        <span class="mode-chip grey"><mat-icon> smartphone </mat-icon> Jeden telefon </span>
+        <div class="round-status" fxLayout="row" fxLayoutGap="6px">
+            <span> Runda {{ round }} </span>
+            <span class="grey"> · {{ isRevealed ? 'zakończona' : 'trwa' }} </span>
+        </div>
+    </div>
+
+    <!-- Runda w toku: wybór gracza i jego rola (jak widok roli w pokoju) -->
+    <div *ngIf="!isRevealed" fxFlex fxFlexFill fxLayout="column" class="content">
+        <div *ngIf="!hasNames" class="picker" fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="5px">
             <div *ngFor="let row of playerRows" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5px">
                 <button *ngFor="let player of row"
                         mat-flat-button
@@ -12,48 +21,92 @@
                 </button>
             </div>
         </div>
-    </div>
 
-    <div [fxFlex]="settings.oneDevice ? '65' : '90'" fxLayout="column" fxLayoutAlign="center center">
+        <!-- z imionami: zawijana lista (imiona mają różne długości) -->
+        <div *ngIf="hasNames" class="picker names-picker">
+            <button *ngFor="let player of playerIds"
+                    mat-flat-button
+                    [color]="player === userId ? 'primary' : 'secondary'"
+                    (click)="setCurrentUser(player)"
+                    class="name-button">
+                {{ pickerLabel(player) }}
+            </button>
+        </div>
 
-        <div fxFlexFill *ngIf="isPhraseShowed" fxLayout="column">
+        <div fxFlex fxLayout="column" fxLayoutAlign="center center">
+            <span *ngIf="!isPhraseShowed" class="grey"> {{ label(userId) }} </span>
 
-            <div fxFlex="30" fxLayout="column" fxLayoutAlign="end center">
-                <span class="phrase-title grey"> Hasło </span>
-                <span class="phrase" *ngIf="!isUserSpy()"> {{ settings.phrase }} </span>
-                <span class="phrase" *ngIf="isUserSpy()"> Szpieg </span>
-            </div>
+            <div fxFlexFill *ngIf="isPhraseShowed" fxLayout="column">
+                <div fxFlex="30" fxLayout="column" fxLayoutAlign="end center">
+                    <span class="phrase-title grey"> Hasło </span>
+                    <span class="phrase"> {{ isUserSpy() ? 'Szpieg' : settings.phrase }} </span>
+                </div>
 
-            <div fxFlex="50" fxLayout="column" fxLayoutAlign="center center">
-                <div *ngIf="settings.category" fxLayout="column" fxLayoutAlign="center center">
-                    <span class="phrase-title grey"> Kategoria </span>
-                    <span class="phrase"> {{ settings.category }} </span>
+                <div fxFlex="50" fxLayout="column" fxLayoutAlign="center center">
+                    <div *ngIf="settings.category" fxLayout="column" fxLayoutAlign="center center">
+                        <span class="phrase-title grey"> Kategoria </span>
+                        <span class="phrase"> {{ settings.category }} </span>
+                    </div>
+                </div>
+
+                <div fxFlex="20" fxLayout="column" fxLayoutAlign="start center">
+                    <span *ngIf="isUserStarting()" class="primary phrase"> Zaczynasz turę! </span>
+                    <span *ngIf="!isUserStarting()" class="grey phrase"> Turę zaczyna {{ label(settings.starts) }} </span>
                 </div>
             </div>
-
-            <div fxFlex="20" fxLayout="column" fxLayoutAlign="start center">
-                <span class="primary phrase" *ngIf="isUserStarting()"> Zaczynasz turę! </span>
-            </div>
-
         </div>
     </div>
-    
-    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
-        <button class="fab" mat-fab color="secondary" (click)="back()">
-          <mat-icon> close </mat-icon>
+
+    <!-- Wynik rundy: tabelka graczy ze szpiegami + hasło i kategoria (jak w pokoju) -->
+    <div *ngIf="isRevealed" fxFlex fxFlexFill fxLayout="column" fxLayoutAlign="start stretch" class="content">
+        <div fxLayout="column" fxLayoutAlign="start center">
+            <div class="players" fxLayout="column" fxLayoutAlign="start stretch">
+                <div class="players-header" fxLayout="row" fxLayoutAlign="space-between baseline" fxLayoutGap="12px">
+                    <span class="players-title"> Gracze · {{ settings.playersCount }} </span>
+                    <span class="players-title"> Szpiedzy · {{ settings.spies.length }} </span>
+                </div>
+                <div class="players-card">
+                    <div *ngFor="let player of playerIds" class="player" fxLayout="row" fxLayoutAlign="start center"
+                         fxLayoutGap="8px" [class.spy]="isSpy(player)">
+                        <span class="nick" fxFlex> {{ label(player) }} </span>
+                        <span *ngIf="isSpy(player)" class="spy-badge"> SZPIEG </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="round" fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="8px">
+            <span class="reveal-phrase primary"> {{ settings.phrase }} </span>
+            <span *ngIf="settings.category" class="reveal-category grey"> {{ settings.category }} </span>
+        </div>
+    </div>
+
+    <div *ngIf="!isRevealed" class="action-row" fxLayout="column" fxLayoutAlign="center end" fxLayoutGap="8px">
+        <button type="button" mat-stroked-button class="action-button" (click)="goToQuestions()">
+            <mat-icon> forum </mat-icon> Przykładowe pytania
         </button>
-        <button *ngIf="!isPhraseShowed"
-            mat-flat-button 
-            class="bottom-button" 
-            color="primary" 
-            (click)="show()"> Pokaż hasło </button>
-        <button *ngIf="isPhraseShowed"
-            mat-flat-button 
-            class="bottom-button" 
-            color="primary" 
-            (click)="hide()"> Ukryj hasło </button>
-        <button class="fab-right" mat-fab color="secondary" (click)="goToQuestions()">
-          <mat-icon> question_mark </mat-icon>
+        <button type="button" mat-stroked-button class="action-button" (click)="confirmEndRound()">
+            <mat-icon> stop_circle </mat-icon> Zakończ rundę
+        </button>
+    </div>
+
+    <div *ngIf="isRevealed" class="action-row" fxLayout="row" fxLayoutAlign="end center">
+        <button type="button" mat-stroked-button class="action-button" (click)="openSettings()">
+            <mat-icon> tune </mat-icon> Ustawienia gry
+        </button>
+    </div>
+
+    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
+        <button class="fab" mat-fab color="secondary" aria-label="Wróć" (click)="back()">
+            <mat-icon> arrow_back </mat-icon>
+        </button>
+
+        <button *ngIf="!isRevealed" mat-flat-button class="bottom-button" color="primary" (click)="togglePhrase()">
+            {{ isPhraseShowed ? 'Ukryj hasło' : 'Pokaż hasło' }}
+        </button>
+
+        <button *ngIf="isRevealed" mat-flat-button class="bottom-button" color="primary" (click)="newRound()">
+            Nowa runda
         </button>
     </div>
 </div>

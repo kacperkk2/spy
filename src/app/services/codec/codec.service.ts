@@ -16,8 +16,8 @@ export class CodecService {
         settings.category + this.delimiter + 
         JSON.stringify(settings.spies) + this.delimiter + 
         settings.starts + this.delimiter + 
-        settings.playersCount + this.delimiter + 
-        settings.oneDevice
+        settings.playersCount + this.delimiter +
+        JSON.stringify(settings.names)
     return compressEncode(short);
   }
 
@@ -29,8 +29,18 @@ export class CodecService {
       spies: JSON.parse(settingsString[2]),
       starts: Number(settingsString[3]),
       playersCount: Number(settingsString[4]),
-      oneDevice: Boolean(JSON.parse(settingsString[5])),
+      // imiona są ostatnim polem — mogą zawierać `;`, więc sklejamy resztę; brak w linkach sprzed imion
+      names: parseNames(settingsString.slice(5).join(this.delimiter)),
     }
+  }
+}
+
+function parseNames(json: string): string[] {
+  try {
+    const names = JSON.parse(json);
+    return Array.isArray(names) ? names.map(n => typeof n === 'string' ? n : '') : [];
+  } catch {
+    return [];
   }
 }
 

@@ -1,0 +1,79 @@
+
+<div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+
+    <div fxFlex="20" fxLayout="column" fxLayoutAlign="center center">
+        <span class="grey"> Każdy na swoim telefonie </span>
+        <button type="button" class="nick-button" mat-button (click)="changeNick()">
+            <ng-container *ngIf="nick; else noNick">
+                <span class="grey"> Twój nick:</span> <span class="primary"> {{ nick }} </span>
+            </ng-container>
+            <ng-template #noNick> <span class="grey"> Ustaw nick </span> </ng-template>
+            <mat-icon class="nick-icon grey"> edit </mat-icon>
+        </button>
+    </div>
+
+    <form class="content" fxFlex="70" fxFlexFill fxLayout="column" fxLayoutAlign="start stretch" fxLayoutGap="12px"
+          (ngSubmit)="joinRoom()">
+
+        <!-- Otwarte pokoje (najwyżej 3); do pozostałych — po kodzie -->
+        <div class="rooms" fxLayout="column" fxLayoutAlign="start stretch" fxLayoutGap="8px">
+            <span class="rooms-title grey"> Otwarte pokoje </span>
+            <!-- Bieżący pokój spoza listy (np. nie zmieścił się w limicie) — żeby zawsze dało się wrócić -->
+            <button *ngIf="currentMissing" type="button" class="room-item current" mat-stroked-button
+                    (click)="returnToRoom()">
+                <div fxLayout="row" fxLayoutAlign="space-between center">
+                    <span class="room-code"> {{ session?.code }} </span>
+                    <span *ngIf="session?.code === ownRoom?.code" class="room-info grey"> twój pokój </span>
+                </div>
+                <span class="return-label"> wróć do pokoju </span>
+            </button>
+            <button *ngFor="let room of rooms?.rooms" type="button" class="room-item" mat-stroked-button
+                    [class.mine]="room.code === ownRoom?.code" [class.current]="isCurrent(room)"
+                    (click)="openRoom(room)">
+                <div fxLayout="row" fxLayoutAlign="space-between center">
+                    <span class="room-code"> {{ room.code }} </span>
+                    <span class="room-info grey">
+                        {{ room.hostNick }} · {{ room.playersCount }}
+                        <mat-icon class="room-icon"> person </mat-icon>
+                        · {{ room.code === ownRoom?.code ? 'twój pokój' : statusLabel(room) }}
+                    </span>
+                </div>
+                <span *ngIf="isCurrent(room)" class="return-label"> wróć do pokoju </span>
+            </button>
+            <span *ngIf="rooms && !rooms.rooms.length" class="hint grey empty-rooms"> Brak otwartych pokojów </span>
+            <span *ngIf="roomsFailed" class="hint grey"> Nie udało się pobrać listy pokoi </span>
+            <span *ngIf="hiddenRooms > 0" class="hint grey">
+                i {{ hiddenRooms }} więcej — wpisz kod pokoju
+            </span>
+        </div>
+
+        <!-- Wejście po kodzie — na dole, mniejsze -->
+        <div class="join" fxLayout="column" fxLayoutAlign="start stretch">
+            <span class="join-title grey"> Pokoju nie ma na liście? Wejdź po kodzie </span>
+            <div fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="10px">
+                <mat-form-field fxFlex appearance="outline">
+                    <mat-label> Kod pokoju </mat-label>
+                    <input class="code-input" matInput [formControl]="code" autocomplete="off"
+                           autocapitalize="characters" spellcheck="false"
+                           [maxlength]="codeLength" (input)="onCodeInput()">
+                    <mat-error *ngIf="code.hasError('roomCode')"> Niepoprawny kod </mat-error>
+                </mat-form-field>
+                <button type="submit" class="join-button" mat-flat-button color="primary" [disabled]="!canJoin">
+                    Dołącz
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="start center">
+        <button class="fab" mat-fab color="secondary" aria-label="Wróć" (click)="back()">
+            <mat-icon> arrow_back </mat-icon>
+        </button>
+        <!-- Własny pokój może być tylko jeden — dopóki istnieje, przycisk prowadzi do niego -->
+        <button type="button" class="bottom-button" fxFlex mat-flat-button color="primary"
+                [disabled]="loading" (click)="createRoom()">
+            {{ ownRoom ? 'Twój pokój ' + ownRoom.code : 'Stwórz pokój' }}
+        </button>
+    </div>
+
+</div>

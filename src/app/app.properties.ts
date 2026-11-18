@@ -1,7 +1,9 @@
 export const CONFIG = {
 
-  USER_ID_KEY: "user_id",
   FORM_KEY: "form",
+  ROOM_SESSION_KEY: "room_session", // stary format (jedna sesja) — tylko do migracji
+  ROOM_SESSIONS_KEY: "room_sessions",
+  NICK_KEY: "nick",
 
   URL_ROOT: "/spy",
 

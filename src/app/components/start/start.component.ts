@@ -1,13 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { CONFIG } from 'src/app/app.properties';
-import { compressToBase64, decompressFromBase64 } from 'lz-string';
-import { StorageManagerService } from 'src/app/services/storage-manager/storage-manager.service';
-import { CodecService } from 'src/app/services/codec/codec.service';
-import { ExportDialog, ExportDialogInput } from 'src/app/export-dialog/export-dialog';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { CodecService } from 'src/app/services/codec/codec.service';
+import { DrawOptions, RoundDrawService } from 'src/app/services/round-draw/round-draw.service';
+import { StorageManagerService } from 'src/app/services/storage-manager/storage-manager.service';
+import {
+  RoundSettingsDialog,
+  RoundSettingsDialogData,
+  RoundSettingsDialogResult,
+  storedDrawOptions,
+} from '../round-settings-dialog/round-settings-dialog';
 
+const DEFAULT_PLAYERS = 3;
+const MIN_PLAYERS = 2;
+const MAX_PLAYERS = 30;
+const MAX_NAME_LENGTH = 20;
+
+/**
+ * „Lobby” gry na jednym urządzeniu (układ jak lobby pokoju online): lista graczy z −/+
+ * (z opcjonalnymi imionami) i te same ustawienia rundy (dialog ⚙) co w pokoju.
+ */
 @Component({
   selector: 'app-start',
   templateUrl: './start.component.html',
@@ -15,213 +28,102 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class StartComponent implements OnInit {
 
-  startForm: FormGroup;
-  allCategories = CONFIG.CATEGORIES;
-  categoriesTitles: string[]; 
-  appRoot = CONFIG.URL_ROOT; 
-  gamePath = '/game'; 
+  readonly minPlayers = MIN_PLAYERS;
+  readonly maxPlayers = MAX_PLAYERS;
+  readonly maxNameLength = MAX_NAME_LENGTH;
 
-  get categoriesFormControl() {
-    return this.startForm.controls["categories"] as FormControl;
-  }
-
-  get categoriesRandomFormControl() {
-    return this.startForm.controls["categoriesRandom"] as FormControl;
-  }
-
-  get spiesFormControl() {
-    return this.startForm.controls["spies"] as FormControl;
-  }
-
-  get spiesRandomFormControl() {
-    return this.startForm.controls["spiesRandom"] as FormControl;
-  }
-
-  get playersFormControl() {
-    return this.startForm.controls["players"] as FormControl;
-  }
-
-  get showCategoryFormControl() {
-    return this.startForm.controls["showCategory"] as FormControl;
-  }
-
-  get linksFormControl() {
-    return this.startForm.controls["links"] as FormControl;
-  }
-
-  get oneDeviceControl() {
-    return this.startForm.controls["oneDevice"] as FormControl;
-  }
-
-  get oneSpyChance() {
-    return this.startForm.controls["oneSpyChance"] as FormControl;
-  }
+  playersCount = DEFAULT_PLAYERS;
+  playerIds: number[] = [];
+  /**
+   * Imiona graczy (indeks = numer gracza − 1); puste → „Gracz N”. Trzymane też dla graczy
+   * ponad bieżącą liczbę, żeby −/+ ich nie gubiło.
+   */
+  names: string[] = [];
 
   constructor(
     private storageManager: StorageManagerService,
     private codec: CodecService,
+    private roundDraw: RoundDrawService,
     private router: Router,
-    public dialog: MatDialog,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
   ) { }
 
   ngOnInit(): void {
-    this.categoriesTitles = this.allCategories.map(i => i.name)
-    this.startForm = new FormGroup({
-      players: new FormControl(3, [Validators.required]),
-      spies: new FormControl(1, [Validators.required]),
-      spiesRandom: new FormControl(false),
-      oneSpyChance: new FormControl(30, [Validators.required]),
-      categories: new FormControl([], [Validators.required]),
-      categoriesRandom: new FormControl(false),
-      showCategory: new FormControl(false),
-      links: new FormControl(3, [Validators.required]),
-      oneDevice: new FormControl(false),
-    });
-    this.checkedRandomSpies();
-    this.checkedRandomCategory();
-    this.checkedOneDevice();
-    const storageForm = this.storageManager.getForm();
-    if (storageForm != null) {
-      this.startForm.patchValue(storageForm);
-    }
+    const form = this.storageManager.getForm();
+    this.names = Array.isArray(form?.names)
+      ? form.names.map((n: unknown) => typeof n === 'string' ? n.slice(0, MAX_NAME_LENGTH) : '')
+      : [];
+    this.setPlayers(Number(form?.players) || DEFAULT_PLAYERS);
   }
 
-  generateClicked() {
-    this.storageManager.saveForm(this.startForm.value);
+  changePlayers(delta: number) {
+    this.setPlayers(this.playersCount + delta);
+    this.saveLobby();
+  }
 
-    if (this.oneDeviceControl.value == true) {
-      this.router.navigate(['/game', this.getDataForLink()]);
+  private setPlayers(count: number) {
+    this.playersCount = Math.min(Math.max(Math.round(count), MIN_PLAYERS), MAX_PLAYERS);
+    this.playerIds = Array.from({ length: this.playersCount }, (_, i) => i + 1);
+  }
+
+  nameOf(player: number): string {
+    return this.names[player - 1] ?? '';
+  }
+
+  setName(player: number, name: string) {
+    this.names[player - 1] = name;
+    this.saveLobby();
+  }
+
+  /** Zapisuje liczbę graczy i imiona (bez pustego ogona) obok ustawień rundy. */
+  private saveLobby() {
+    const names = Array.from({ length: MAX_PLAYERS }, (_, i) => this.names[i] ?? '');
+    while (names.length && !names[names.length - 1].trim()) names.pop();
+    this.storageManager.saveForm({ ...(this.storageManager.getForm() ?? {}), players: this.playersCount, names });
+  }
+
+  start() {
+    this.saveLobby();
+    const options = storedDrawOptions(this.storageManager, this.playersCount);
+    if (!options) {
+      this.snackBar.open('Uzupełnij ustawienia rundy', 'OK', { duration: 3000 });
+      this.openSettings();
       return;
     }
-
-    const links = this.getLinks(Number(this.linksFormControl.value))
-
-    const data = new ExportDialogInput(links);
-    const dialogRef = this.dialog.open(ExportDialog, {data: data, width: '90%', maxWidth: '650px', autoFocus: false});
-    dialogRef.afterClosed().subscribe();
+    this.router.navigate(['/game', drawOfflineGame(this.roundDraw, this.codec, this.playersCount, this.names, options)]);
   }
 
-  getLinks(numberOfLinks: number): string [] {
-    const links: string[] = [];
-    Array.from(Array(numberOfLinks)).forEach((_, i) => {
-      links.push((i+1) + ". \n" + this.getLink());
-    });
-    return links;
-  }
-
-  getLink() {
-    const url = location.origin + this.appRoot + this.gamePath + "/" + this.getDataForLink();
-    return url
-  }
-
-  getDataForLink() {
-    const category = this.getCategory(this.categoriesFormControl.value, this.categoriesRandomFormControl.value)
-    const settings: Settings = {
-      phrase: getRandom(category.values),
-      category: this.showCategoryFormControl.value ? category.name : null,
-      spies: this.getSpies(this.spiesFormControl.value, this.spiesRandomFormControl.value, this.playersFormControl.value, this.oneSpyChance.value),
-      starts: randomPlayer(this.playersFormControl.value),
-      playersCount: this.playersFormControl.value,
-      oneDevice: this.oneDeviceControl.value
-    }
-    return this.codec.compress(settings)
-  }
-
-  getCategoryByName(name: string) {
-    return this.allCategories.filter(i => i.name == name)
-  }
-
-  getCategory(categories: string[], categoriesRandom: boolean) {
-    if (categoriesRandom) {
-      const category = getRandom(this.allCategories);
-      return category
-    }
-    
-    const categoriesToPick = this.allCategories.filter(i => categories.includes(i.name));
-    const category = getRandom(categoriesToPick)
-    return category
-  }
-
-  getSpies(spies: number, spiesRandom: boolean, players: number, oneSpyChance: number) {
-    let spiesNumber = spies;
-    if (spiesRandom) {
-      spiesNumber = getRandomSpies(players, oneSpyChance)
-    }
-    const allPlayersIds = Array.from({length: players}, (_, i) => i + 1)
-    const shuffledPlayers = allPlayersIds.sort(() => 0.5 - Math.random());
-    return shuffledPlayers.slice(0, spiesNumber);
+  openSettings() {
+    openOfflineSettings(this.dialog, this.playersCount).subscribe();
   }
 
   back() {
     this.router.navigate(['/']);
   }
+}
 
-  checkedRandomSpies() {
-    this.spiesRandomFormControl.valueChanges.subscribe(val => {
-      if (this.spiesRandomFormControl.value == true) {
-        this.spiesFormControl.clearValidators();
-        this.spiesFormControl.disable();
-        this.oneSpyChance.setValidators([Validators.required]);
-        this.oneSpyChance.enable();
-      } else {
-        this.spiesFormControl.setValidators([Validators.required]);
-        this.spiesFormControl.enable();
-        this.oneSpyChance.clearValidators();
-        this.oneSpyChance.disable();
-      }
-      this.spiesFormControl.updateValueAndValidity();
-      this.oneSpyChance.updateValueAndValidity();
-    });
-  }
+/** Losuje rundę offline i zwraca dane do URL `game/<data>`. */
+export function drawOfflineGame(roundDraw: RoundDrawService, codec: CodecService, playersCount: number,
+                                names: string[], options: DrawOptions): string {
+  const playerIds = Array.from({ length: playersCount }, (_, i) => i + 1);
+  const round = roundDraw.draw(playerIds, options);
+  const settings: Settings = {
+    phrase: round.phrase,
+    category: round.showCategory ? round.category : null,
+    spies: round.spyIds,
+    starts: round.startingId,
+    playersCount,
+    names: playerIds.map(id => (names[id - 1] ?? '').trim()),
+  };
+  return codec.compress(settings);
+}
 
-  checkedRandomCategory() {
-    this.categoriesRandomFormControl.valueChanges.subscribe(val => {
-      if (this.categoriesRandomFormControl.value == true) {
-        this.categoriesFormControl.clearValidators();
-        this.categoriesFormControl.disable();
-      } else {
-        this.categoriesFormControl.setValidators([Validators.required]);
-        this.categoriesFormControl.enable();
-      }
-      this.categoriesFormControl.updateValueAndValidity();
-    });
-  }
-
-  checkedOneDevice() {
-    this.oneDeviceControl.valueChanges.subscribe(val => {
-      if (this.oneDeviceControl.value == true) {
-        this.linksFormControl.clearValidators();
-        this.linksFormControl.disable();
-      } else {
-        this.linksFormControl.setValidators([Validators.required]);
-        this.linksFormControl.enable();
-      }
-      this.linksFormControl.updateValueAndValidity();
-    });
-  }
-
-  restrictCharacters(event: KeyboardEvent) {
-    const invalidChars = ['+', '-'];
-    if (invalidChars.includes(event.key)) {
-      event.preventDefault();
-    }
-  }
-
-  checkSpies() {
-    if (this.spiesFormControl.value == null) {
-      this.spiesFormControl.setErrors({'incorrect': true});
-      return;
-    }
-
-    const spies = Number(this.spiesFormControl.value)
-    const players = Number(this.playersFormControl.value)
-    if (spies > players) {
-      this.spiesFormControl.setErrors({'incorrect': true});
-    }
-    else {
-      this.spiesFormControl.setErrors(null);
-    }
-  }
+/** Dialog ustawień rundy w trybie jednego urządzenia (bez „Zamknij pokój”). */
+export function openOfflineSettings(dialog: MatDialog, playersCount: number) {
+  return dialog.open<RoundSettingsDialog, RoundSettingsDialogData, RoundSettingsDialogResult>(RoundSettingsDialog, {
+    data: { playersCount }, width: '90%', maxWidth: '500px', autoFocus: false,
+  }).afterClosed();
 }
 
 export interface Settings {
@@ -230,26 +132,11 @@ export interface Settings {
   spies: number[],
   starts: number,
   playersCount: number,
-  oneDevice: boolean
+  /** Imiona graczy (indeks = numer − 1), '' gdy brak; [] w linkach sprzed imion. */
+  names: string[],
 }
 
-function getRandom(data: any) {
-  return data[Math.floor(Math.random() * data.length)]
-}
-
-function randomPlayer(max: number) {
-  return Math.floor(Math.random() * max) + 1
-}
-
-function getRandomSpies(players: number, oneSpyChance: number) {
-  const chaosChance = (100 - oneSpyChance) / 100;
-  if (Math.random() > chaosChance) {
-    return 1;
-  }
-
-  // wypadlo ze bedzie inna liczba szpiegow niz 1
-  const effectiveMax = Math.min(players, CONFIG.MAX_SPIES_LIMIT);
-  const pool = effectiveMax;
-  const roll = Math.floor(Math.random() * pool);
-  return roll < 1 ? 0 : roll + 1;
+/** Etykieta gracza: imię albo „Gracz N”. */
+export function playerLabel(names: string[], player: number): string {
+  return names[player - 1]?.trim() || `Gracz ${player}`;
 }

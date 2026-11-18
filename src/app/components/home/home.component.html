@@ -1,21 +1,45 @@
 
 <div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
 
-    <div fxFlex="30" fxLayout="column" fxLayoutAlign="center center">
-        <span class="user-label"> Gracz numer </span>
-    </div>
-
-    <div fxFlex="60" fxLayout="column" fxLayoutAlign="start center">
-        <span class="id-label"> {{ userId }} </span>
-        <button class="small-button" mat-flat-button (click)="changeUserId()"> Zmień numer </button>
-    </div>
-    
-
-    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
-        <button class="fab" mat-fab color="secondary" (click)="goToQuestions()">
-            <mat-icon> question_mark </mat-icon>
+    <div fxFlex="20" fxLayout="column" fxLayoutAlign="center center">
+        <span class="title"> Szpieg </span>
+        <button type="button" class="nick-button" mat-button (click)="changeNick()">
+            <ng-container *ngIf="nick; else noNick">
+                <span class="grey"> Twój nick:</span> <span class="primary"> {{ nick }} </span>
+            </ng-container>
+            <ng-template #noNick> <span class="grey"> Ustaw swój nick </span> </ng-template>
+            <mat-icon class="nick-icon grey"> edit </mat-icon>
         </button>
-        <button class="bottom-button" mat-flat-button color="primary" (click)="start()"> Stwórz grę </button>
+    </div>
+
+    <div class="content" fxFlex="80" fxFlexFill fxLayout="column" fxLayoutAlign="start stretch" fxLayoutGap="16px">
+
+        <span class="question grey"> Wybierz tryb gry</span>
+
+        <button type="button" class="mode-tile" mat-stroked-button (click)="online()">
+            <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
+                <mat-icon class="mode-icon primary"> groups </mat-icon>
+                <div fxLayout="column" fxLayoutAlign="center start">
+                    <span class="mode-title"> Każdy na swoim telefonie </span>
+                    <span class="mode-desc grey"> pokój online, dołączanie kodem </span>
+                </div>
+            </div>
+        </button>
+
+        <button type="button" class="mode-tile" mat-stroked-button (click)="oneDevice()">
+            <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
+                <mat-icon class="mode-icon primary"> smartphone </mat-icon>
+                <div fxLayout="column" fxLayoutAlign="center start">
+                    <span class="mode-title"> Jeden telefon </span>
+                    <span class="mode-desc grey"> podajecie sobie urządzenie </span>
+                </div>
+            </div>
+        </button>
+
+        <button *ngIf="session" type="button" class="small-button" mat-stroked-button color="primary"
+                (click)="returnToRoom()">
+            {{ session.isHost ? 'Wróć do swojego pokoju' : 'Wróć do pokoju' }} {{ session.code }}
+        </button>
     </div>
 
 </div>

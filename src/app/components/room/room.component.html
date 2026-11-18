@@ -1,0 +1,161 @@
+
+<div fxFlexFill fxLayout="column" fxLayoutAlign="start center">
+
+    <div class="top-bar" fxLayout="row" fxLayoutAlign="space-between start">
+        <button type="button" mat-button class="room-chip" aria-label="Kopiuj link do pokoju"
+                [cdkCopyToClipboard]="roomLink" (cdkCopyToClipboardCopied)="linkCopied()">
+            <span class="grey"> Pokój </span>
+            <span class="code"> {{ code }} </span>
+            <mat-icon class="link-icon"> link </mat-icon>
+        </button>
+        <div *ngIf="view === 'room' && state" class="round-status" fxLayout="column" fxLayoutAlign="start end">
+            <div fxLayout="row" fxLayoutGap="6px">
+                <span> {{ roundLabel }} </span>
+                <span *ngIf="statusLabel" class="grey"> · {{ statusLabel }} </span>
+            </div>
+            <span *ngIf="connection === 'connecting'" class="grey connecting"> Łączenie… </span>
+        </div>
+    </div>
+
+    <div fxFlex fxFlexFill fxLayout="column" fxLayoutAlign="start stretch" class="content">
+
+        <div *ngIf="view === 'loading'" fxLayout="column" fxLayoutAlign="center center">
+            <span class="grey"> Łączenie… </span>
+        </div>
+
+        <form *ngIf="view === 'join'" fxLayout="column" fxLayoutAlign="start stretch" fxLayoutGap="12px"
+              (ngSubmit)="join()">
+            <span class="label"> Podaj nick, żeby dołączyć </span>
+            <mat-form-field appearance="outline">
+                <mat-label> Nick </mat-label>
+                <input matInput [formControl]="nick" autocomplete="off" [maxlength]="nickMaxLength">
+                <mat-error *ngIf="nick.hasError('required')"> Podaj nick </mat-error>
+                <mat-error *ngIf="nick.hasError('maxlength')"> Maks. {{ nickMaxLength }} znaków </mat-error>
+                <mat-error *ngIf="nick.hasError('nickTaken')"> Ten nick jest już zajęty w tym pokoju </mat-error>
+            </mat-form-field>
+            <button type="submit" class="bottom-button" mat-flat-button color="primary"
+                    [disabled]="joining || nick.invalid">
+                Dołącz
+            </button>
+        </form>
+
+        <div *ngIf="view === 'error'" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="12px">
+            <span class="label"> {{ errorMessage }} </span>
+            <button class="small-button" mat-stroked-button (click)="retry()"> Spróbuj ponownie </button>
+        </div>
+
+        <!-- Runda w toku: rola gracza (host widzi dokładnie to samo) -->
+        <div *ngIf="view === 'room' && state?.status === 'IN_ROUND'" class="role" fxFlex fxLayout="column">
+
+            <div fxFlex fxLayout="column" fxLayoutAlign="center center">
+                <span *ngIf="!role" class="grey"> Wczytywanie roli… </span>
+
+                <ng-container *ngIf="role as r">
+                    <span *ngIf="!r.participating" class="label">
+                        Dołączyłeś w trakcie rundy — poczekaj na następną
+                    </span>
+
+                    <div fxFlexFill *ngIf="r.participating && isPhraseShowed" fxLayout="column">
+                        <div fxFlex="30" fxLayout="column" fxLayoutAlign="end center">
+                            <span class="phrase-title grey"> Hasło </span>
+                            <span class="phrase"> {{ r.isSpy ? 'Szpieg' : r.phrase }} </span>
+                        </div>
+
+                        <div fxFlex="50" fxLayout="column" fxLayoutAlign="center center">
+                            <div *ngIf="r.category" fxLayout="column" fxLayoutAlign="center center">
+                                <span class="phrase-title grey"> Kategoria </span>
+                                <span class="phrase"> {{ r.category }} </span>
+                            </div>
+                        </div>
+
+                        <div fxFlex="20" fxLayout="column" fxLayoutAlign="start center">
+                            <span *ngIf="r.isStarting" class="primary phrase"> Zaczynasz turę! </span>
+                            <span *ngIf="!r.isStarting && startingNick" class="grey phrase"> Turę zaczyna {{ startingNick }} </span>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+
+        <div *ngIf="view === 'room' && state && state.status !== 'IN_ROUND'" fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="6px">
+            <div class="players" fxLayout="column" fxLayoutAlign="start stretch">
+                <div class="players-header" fxLayout="row" fxLayoutAlign="space-between baseline" fxLayoutGap="12px">
+                    <span class="players-title"> Gracze · {{ state.players.length }} </span>
+                    <span *ngIf="state.status === 'REVEALED'; else hostLine" class="players-title">
+                        <ng-container *ngIf="reveal"> Szpiedzy · {{ reveal.spyPlayerIds.length }} </ng-container>
+                    </span>
+                    <ng-template #hostLine>
+                        <span *ngIf="hostNick" class="grey host-line"> host: {{ hostNick }} </span>
+                    </ng-template>
+                </div>
+                <div class="players-card">
+                    <div *ngFor="let player of state.players" class="player" fxLayout="row" fxLayoutAlign="start center"
+                         fxLayoutGap="8px" [class.spy]="isSpy(player.id)">
+                        <mat-icon *ngIf="player.id === session?.playerId" class="me-icon" aria-label="Ty">person</mat-icon>
+                        <span class="nick" fxFlex> {{ player.nick }} </span>
+                        <span *ngIf="isSpy(player.id)" class="spy-badge"> SZPIEG </span>
+                    </div>
+                </div>
+            </div>
+            <span *ngIf="state.status === 'LOBBY' && state.players.length < minPlayers" class="grey hint">
+                Potrzeba co najmniej {{ minPlayers }} graczy
+            </span>
+        </div>
+
+        <!-- Wynik rundy (pod tabelką graczy) -->
+        <div *ngIf="view === 'room' && state?.status === 'REVEALED'" class="round"
+             fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="8px">
+            <span *ngIf="!reveal" class="grey"> Wczytywanie wyniku… </span>
+            <ng-container *ngIf="reveal">
+                <span class="reveal-phrase primary"> {{ reveal.phrase }} </span>
+                <span class="reveal-category grey"> {{ reveal.category }} </span>
+            </ng-container>
+        </div>
+    </div>
+
+    <div *ngIf="view === 'room' && state?.status === 'IN_ROUND'" class="action-row"
+         fxLayout="column" fxLayoutAlign="center end" fxLayoutGap="8px">
+        <button type="button" mat-stroked-button class="action-button" (click)="goToQuestions()">
+            <mat-icon> forum </mat-icon> Przykładowe pytania
+        </button>
+        <button *ngIf="isHost" type="button" mat-stroked-button class="action-button" [disabled]="busy"
+                (click)="confirmEndRound()">
+            <mat-icon> stop_circle </mat-icon> Zakończ rundę
+        </button>
+    </div>
+
+    <div *ngIf="view === 'room' && state && state.status !== 'IN_ROUND' && isHost" class="action-row"
+         fxLayout="row" fxLayoutAlign="space-between center">
+        <button type="button" mat-stroked-button class="action-button danger-button" [disabled]="busy"
+                (click)="confirmCloseRoom()">
+            Zamknij pokój
+        </button>
+        <button type="button" mat-stroked-button class="action-button" (click)="openSettings()">
+            <mat-icon> tune </mat-icon> Ustawienia gry
+        </button>
+    </div>
+
+    <div fxFlex="10" fxFlexFill fxLayout="row" fxLayoutAlign="space-between center">
+        <button class="fab" mat-fab color="secondary" aria-label="Wróć" (click)="back()">
+            <mat-icon> arrow_back </mat-icon>
+        </button>
+
+        <ng-container *ngIf="view === 'room' && state">
+            <button *ngIf="state.status === 'IN_ROUND' && role?.participating" class="bottom-button" mat-flat-button
+                    color="primary" (click)="togglePhrase()">
+                {{ isPhraseShowed ? 'Ukryj hasło' : 'Pokaż hasło' }}
+            </button>
+            <button *ngIf="state.status !== 'IN_ROUND' && isHost" class="bottom-button" mat-flat-button color="primary"
+                    [disabled]="busy || !canStartRound" (click)="newRound()">
+                Nowa runda
+            </button>
+            <!-- gracz czeka w miejscu, gdzie host ma „Nowa runda” -->
+            <div *ngIf="!isHost && (state.status === 'REVEALED' || (state.status === 'LOBBY' && state.players.length >= minPlayers))"
+                 class="bottom-wait grey" fxLayout="row" fxLayoutAlign="center center">
+                {{ state.status === 'REVEALED' ? 'Oczekiwanie na następną rundę…' : 'Oczekiwanie na start hosta…' }}
+            </div>
+        </ng-container>
+
+    </div>
+
+</div>

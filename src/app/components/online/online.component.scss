@@ -1,0 +1,123 @@
+
+.code-input {
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+.join-button {
+  height: 56px;
+  margin-top: 4px;
+  border-radius: 25px !important;
+  font-size: 17px;
+}
+
+.nick-button {
+  font-size: 15px;
+  border-radius: 20px;
+}
+
+.nick-icon {
+  font-size: 16px;
+  height: 16px;
+  width: 16px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.room-item {
+  border-radius: 25px !important;
+  height: 48px;
+  text-align: left;
+}
+
+.room-item.mine {
+  border-color: currentColor;
+}
+
+// pokój, do którego można wrócić: obramowanie w kolorze primary (orange 400) + napis na dolnej krawędzi
+.room-item.current {
+  border-color: #FFA726;
+  overflow: visible;
+  margin-bottom: 6px;
+}
+
+.return-label {
+  position: absolute;
+  left: 9px; // pod kodem (padding przycisku 15px minus padding napisu)
+  bottom: -8px;
+  padding: 0 6px;
+  font-size: 11px;
+  line-height: 14px;
+  color: #FFA726;
+  background-color: #282828; // tło strony — przerywa linię obramowania
+  white-space: nowrap;
+}
+
+.room-code {
+  font-size: 18px;
+  letter-spacing: 3px;
+}
+
+.room-info {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 8px;
+}
+
+.room-icon {
+  font-size: 14px;
+  height: 14px;
+  width: 14px;
+  vertical-align: middle;
+}
+
+.rooms-title {
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.hint {
+  text-align: center;
+  font-size: 13px;
+}
+
+// treść przycisku na całą szerokość (kod po lewej, opis po prawej)
+.room-item ::ng-deep .mat-button-wrapper {
+  display: block;
+}
+
+.content {
+  overflow-y: auto;
+}
+
+// wejście po kodzie: na dole treści, zmniejszone
+.join {
+  margin-top: auto;
+  padding-top: 8px;
+
+  ::ng-deep .mat-form-field {
+    font-size: 12px;
+  }
+
+  .code-input {
+    letter-spacing: 3px;
+  }
+
+  .join-button {
+    height: 40px;
+    line-height: 40px;
+    margin-top: 5px;
+    font-size: 14px;
+  }
+}
+
+.join-title {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.empty-rooms {
+  margin-top: 12px;
+}

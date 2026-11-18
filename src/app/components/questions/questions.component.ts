@@ -34,9 +34,9 @@ export class QuestionsComponent implements OnInit {
 
     this.route.params.subscribe(params => {
       const data = params['data'];
-      if (data) {
-        const dataStringArray = [data as string]
-        this.categoriesFormControl.setValue(dataStringArray)
+      // parametr spoza listy kategorii (np. stare „null”) ignorujemy
+      if (data && this.categoriesTitles.includes(data)) {
+        this.categoriesFormControl.setValue([data as string])
         this.next()
       }
     });
@@ -55,7 +55,11 @@ export class QuestionsComponent implements OnInit {
         }
       })
 
-    this.question = this.getRandom(questions)
+    this.question = questions.length ? this.getRandom(questions) : ''
+  }
+
+  get hasCategories(): boolean {
+    return (this.categoriesFormControl.value ?? []).length > 0;
   }
 
   getRandom(data: any) {
